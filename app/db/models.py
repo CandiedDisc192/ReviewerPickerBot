@@ -13,7 +13,7 @@ class Base(AsyncAttrs, DeclarativeBase):
 
 
 class User(Base):
-    __table_name__ = 'users'
+    __tablename__ = 'users'
 
     username: Mapped[str] = mapped_column(primary_key=True)
     available: Mapped[bool] = mapped_column()
