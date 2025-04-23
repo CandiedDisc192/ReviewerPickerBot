@@ -1,7 +1,8 @@
+import os
+
 from pyrogram import Client, utils
 import app.db.requests as rq
 import asyncio
-from config import api_id, api_hash, bot_token
 
 
 def get_peer_type_new(peer_id: int) -> str:
@@ -18,6 +19,7 @@ utils.get_peer_type = get_peer_type_new
 
 
 async def get_chat_members(chat_id):
+    api_id, api_hash, bot_token = os.getenv("ID"), os.getenv("HASH"), os.getenv("TOKEN")
     app = Client("Имя | Бот", api_id=api_id, api_hash=api_hash, bot_token=bot_token, in_memory=True)
     try:
         await app.start()
