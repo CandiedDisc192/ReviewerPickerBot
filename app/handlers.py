@@ -7,6 +7,7 @@ from collections import deque
 import app.keyboards as kb
 from app.client_data import get_chat_members
 import app.db.requests as rq
+from app.texts import info_message, command_list, pool_message
 
 router = Router()
 
@@ -59,103 +60,44 @@ async def cmd_available(message: Message):
 
 @router.message(Command("pool"))
 async def cmd_pull(message: Message):
-    if message.chat.type != "private":
-        active_users = await rq.get_active_users(message.chat.id)
-        answer = "<b>📋 Текущий пулл</b>\n\n"
-        new_users = list(map(lambda x: f"<code>{x}</code>", active_users))
-        answer += ", ".join(new_users)
-        await message.answer(answer, parse_mode="HTML")
-    else:
+    if message.chat.type == "private":
         await message.answer("Пулл доступен только в групповом чате")
+        return
+    users = await rq.get_active_users(message.chat.id)
+    await message.answer(pool_message(users), parse_mode="HTML")
+
+
+@router.callback_query(F.data == "pool")
+async def pull_callback(callback: CallbackQuery):
+    if callback.message.chat.type == "private":
+        await callback.answer("Пулл доступен только в групповом чате")
+        return
+    await callback.answer("Текущий пулл")
+    users = await rq.get_active_users(callback.message.chat.id)
+    await callback.message.answer(pool_message(users), parse_mode="HTML")
+
+
+@router.message(Command("info"))
+async def info(message: Message):
+    await message.answer(info_message(), parse_mode="HTML")
+
+
+@router.callback_query(F.data == "info")
+async def info_callback(callback: CallbackQuery):
+    await callback.answer("О боте")
+    await callback.message.answer(info_message(), parse_mode="HTML")
 
 
 @router.message(Command("help"))
 async def help_command(message: Message):
     answer = "<b>🦾 Список команд</b>\n\n"
-    cmds = [
-        "/start — Запустить бота",
-        "/available — Сделать себя доступным для ревью",
-        "/unavailable — Сделать себя недоступным для ревью",
-        "/pool — Вывести пулл доступных для ревью участников",
-        "/help — Вывести список команд",
-    ]
-    answer += "\n".join(cmds)
-    await message.answer(answer, parse_mode="HTML")
+    await message.answer(command_list(), parse_mode="HTML")
 
 
-@router.message(Command("info"))
-async def info(message: Message):
-    answer = (
-        "ℹ️ Этот бот помогает автоматически назначать двух человек на ревью MR. \n\n"
-        + "Просто добавьте бота в ваш рабочий чат и напишите команду /start. "
-        + (
-            "Tеперь на все сообщения, содержащие <code>ссылку</code>, будут назначаться два рандомных человека из "
-            "группы, кроме автора сообщения."
-        )
-        + (
-            "Если вы скидываете ссылку не с целью запроса ревью на нее, начните сообщение с <code>!</code> и бот не "
-            "отреагирует на нее.\n\n"
-        )
-        + (
-            "Есть возможность посмотреть список всех доступных для ревью участников, для этого выберите <b>📋 "
-            "Текущий пулл</b> в меню.\n\n"
-        )
-        + "Чтобы убрать себя из списка вызовите команду /unavailable, чтобы вернуться — /available."
-    )
-
-    await message.answer(answer, parse_mode="HTML")
-
-
-@router.callback_query(F.data == "info")
-async def info(callback: CallbackQuery):
-    await callback.answer("О боте")
-    message = (
-        "ℹ️ Этот бот помогает автоматически назначать двух человек на ревью MR. \n\n"
-        + "Просто добавьте бота в ваш рабочий чат и напишите команду /start. "
-        + (
-            "Теперь на все сообщения, содержащие ссылку, будут назначаться два рандомных человека из группы, "
-            "кроме автора сообщения."
-        )
-        + (
-            "Если вы скидываете ссылку не с целью запроса ревью на нее, начните сообщение с ! и бот не отреагирует "
-            "на нее.\n\n"
-        )
-        + (
-            "Есть возможность посмотреть список всех доступных для ревью участников, для этого выберите 📋 Текущий "
-            "пулл в меню.\n\n"
-        )
-        + "Чтобы убрать себя из списка вызовите команду /unavailable, чтобы вернуться — /available."
-    )
-    await callback.message.answer(message, parse_mode="HTML")
-
-
-@router.callback_query(F.data == "pool")
-async def pull(callback: CallbackQuery):
-    active_users = await rq.get_active_users(callback.message.chat.id)
-    if callback.message.chat.type != "private":
-        await callback.answer("Текущий пулл")
-        message = "<b>📋 Текущий пулл</b>\n\n"
-        new_users = list(map(lambda x: f"<code>{x}</code>", active_users))
-        message += ", ".join(new_users)
-        await callback.message.answer(message, parse_mode="HTML")
-    else:
-        await callback.answer("Пулл доступен только в групповом чате")
-
-
-@router.callback_query(F.data == "commands")
-async def commands(callback: CallbackQuery):
+@router.callback_query(F.data == "help")
+async def help_command(callback: CallbackQuery):
     await callback.answer("Команды")
-    message = "<b>🦾 Список команд</b>\n\n"
-    cmds = [
-        "/start — Запустить бота",
-        "/help — Вывести список команд",
-        "/info — Вывести информацию о боте",
-        "/pool — Вывести пулл доступных для ревью участников",
-        "/available — Сделать себя доступным для ревью",
-        "/unavailable — Сделать себя недоступным для ревью",
-    ]
-    message += "\n".join(cmds)
-    await callback.message.answer(message, parse_mode="HTML")
+    await callback.message.answer(command_list(), parse_mode="HTML")
 
 
 url_pattern = re.compile(

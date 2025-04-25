@@ -6,6 +6,6 @@ catalog = InlineKeyboardMarkup(
             InlineKeyboardButton(text="ℹ️ О боте", callback_data="info"),
             InlineKeyboardButton(text="📋 Текущий пулл", callback_data="pool"),
         ],
-        [InlineKeyboardButton(text="🦾 Список команд", callback_data="commands")],
+        [InlineKeyboardButton(text="🦾 Список команд", callback_data="help")],
     ]
 )
