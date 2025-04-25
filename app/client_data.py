@@ -1,8 +1,7 @@
 import os
-
+import asyncio
 from pyrogram import Client, utils
 import app.db.requests as rq
-import asyncio
 
 
 def get_peer_type_new(peer_id: int) -> str:
@@ -19,27 +18,39 @@ utils.get_peer_type = get_peer_type_new
 
 
 async def get_chat_members(chat_id):
-    api_id, api_hash, bot_token = os.getenv("ID"), os.getenv("HASH"), os.getenv("TOKEN")
-    app = Client("Имя | Бот", api_id=api_id, api_hash=api_hash, bot_token=bot_token, in_memory=True)
-    try:
-        await app.start()
-        try:
-            chat = await app.get_chat(chat_id)
-            print(f"Чат найден: {chat.title}")
-        except Exception as e:
-            print(f"Чат с ID {chat_id} не найден или бот не имеет доступа: {e}")
-            return
+    api_id = os.getenv("ID")
+    api_hash = os.getenv("HASH")
+    bot_token = os.getenv("TOKEN")
 
+    app = Client(
+        name="bot",
+        api_id=api_id,
+        api_hash=api_hash,
+        bot_token=bot_token,
+        in_memory=True
+    )
+
+    try:
+        print("Старт pyrogram")
+        await asyncio.wait_for(app.start(), timeout=25)
+        print("Клиент запущен")
+
+        chat = await app.get_chat(chat_id)
+        print(f"Чат найден: {chat.title}")
+
+        print("Получаю участников:")
         async for member in app.get_chat_members(chat_id):
-            print(member.user.username)
-            if member.user.username != "ReviewerPickerBot" and member.user.username:
-                await rq.set_user(member.user.username)
+            username = member.user.username
+            if username and username != "ReviewerPickerBot":
+                print(f"Добавляю пользователя: {username}")
+                await rq.set_user(username)
             await asyncio.sleep(1)
-    except ValueError as e:
-        print(f"Ошибка при получении участников чата: {e}")
+
+    except asyncio.TimeoutError:
+        print("Таймаут при подключении клиента.")
     except Exception as e:
-        print(f"Произошла ошибка: {e}")
+        print(f"Ошибка: {e}")
     finally:
         if app.is_connected:
             await app.stop()
-    return
+            print("Клиент остановлен.")
