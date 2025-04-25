@@ -16,6 +16,7 @@ class User(Base):
     __tablename__ = 'users'
 
     username: Mapped[str] = mapped_column(primary_key=True)
+    chat_id: Mapped[str] = mapped_column(primary_key=True)
     available: Mapped[bool] = mapped_column()
     date_to_available: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 

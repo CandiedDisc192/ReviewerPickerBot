@@ -43,7 +43,7 @@ async def get_chat_members(chat_id):
             username = member.user.username
             if username and username != "ReviewerPickerBot":
                 print(f"Добавляю пользователя: {username}")
-                await rq.set_user(username)
+                await rq.set_user(username, chat_id)
             await asyncio.sleep(1)
 
     except asyncio.TimeoutError:
