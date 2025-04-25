@@ -27,7 +27,7 @@ async def get_chat_members(chat_id):
         api_id=api_id,
         api_hash=api_hash,
         bot_token=bot_token,
-        in_memory=True
+        in_memory=True,
     )
 
     try:

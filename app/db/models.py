@@ -17,7 +17,7 @@ class Base(AsyncAttrs, DeclarativeBase):
 
 
 class User(Base):
-    __tablename__ = 'users'
+    __tablename__ = "users"
 
     username: Mapped[str] = mapped_column(primary_key=True)
     chat_id: Mapped[str] = mapped_column(primary_key=True)
@@ -28,4 +28,4 @@ class User(Base):
 async def async_main():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-        print('Table created')
+        print("Table created")
