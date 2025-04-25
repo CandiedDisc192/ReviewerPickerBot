@@ -1,4 +1,4 @@
-from sqlalchemy import DateTime
+from sqlalchemy import DateTime, String, JSON
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.ext.asyncio import AsyncAttrs, async_sessionmaker, create_async_engine
 from datetime import datetime
@@ -23,6 +23,13 @@ class User(Base):
     chat_id: Mapped[str] = mapped_column(primary_key=True)
     available: Mapped[bool] = mapped_column()
     date_to_available: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+
+
+class ChatSelectionHistory(Base):
+    __tablename__ = "chat_selection_history"
+
+    chat_id: Mapped[str] = mapped_column(String, primary_key=True)
+    last_selected: Mapped[list[str]] = mapped_column(JSON, default=[])
 
 
 async def async_main():

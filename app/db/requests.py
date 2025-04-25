@@ -1,5 +1,4 @@
-from app.db.models import async_session
-from app.db.models import User
+from app.db.models import async_session, User, ChatSelectionHistory
 from sqlalchemy import select, update
 
 
@@ -34,3 +33,24 @@ async def get_active_users(chat_id):
         )
         result = await session.scalars(stmt)
         return [user for user in result]
+
+
+async def get_last_selected(chat_id):
+    async with async_session() as session:
+        record = await session.get(ChatSelectionHistory, chat_id)
+        return record.last_selected if record else []
+
+
+async def update_last_selected(chat_id, first, second):
+    async with async_session() as session:
+        record = await session.get(ChatSelectionHistory, chat_id)
+        if not record:
+            record = ChatSelectionHistory(chat_id=chat_id, last_selected=[])
+            session.add(record)
+        else:
+            record.last_selected = record.last_selected[-2:]
+
+        record.last_selected.append(first)
+        record.last_selected.append(second)
+
+        await session.commit()

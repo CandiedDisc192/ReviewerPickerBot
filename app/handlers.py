@@ -104,8 +104,6 @@ url_pattern = re.compile(
     r"(https?://(?:www\.)?git(?:hub|lab)\.\S+|(?:www\.)?git(?:hub|lab)\.\S+)"
 )
 
-LAST_SELECTED = deque(maxlen=4)
-
 
 @router.message(F.chat.type != "private")
 async def check_message_for_links(message: Message):
@@ -126,18 +124,19 @@ async def check_message_for_links(message: Message):
 
         user_weights = {user: 1.0 for user in active_users}
 
-        for user in LAST_SELECTED:
+        last_selected = await rq.get_last_selected(message.chat.id)
+
+        for user in last_selected:
             if user in user_weights:
                 user_weights[user] *= 0.5
-
+        print(user_weights)
         users, weights = zip(*user_weights.items())
-
+        print(users, weights)
         first_user = random.choices(users, weights=weights, k=1)[0]
         del user_weights[first_user]
         users, weights = zip(*user_weights.items())
-
         second_user = random.choices(users, weights=weights, k=1)[0]
-        LAST_SELECTED.append(first_user)
-        LAST_SELECTED.append(second_user)
+
+        await rq.update_last_selected(message.chat.id, first_user, second_user)
 
         await message.reply(f"@{first_user} и @{second_user}")
