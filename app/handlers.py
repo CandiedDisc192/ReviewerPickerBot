@@ -134,7 +134,7 @@ async def commands(callback: CallbackQuery):
 
 
 url_pattern = re.compile(
-    r'(https?://(?:www\.)?\S+)|(www\.\S+)'
+    r'(https?://(?:www\.)?git(?:hub|lab)\.\S+|(?:www\.)?git(?:hub|lab)\.\S+)'
 )
 
 LAST_SELECTED = deque(maxlen=4)
