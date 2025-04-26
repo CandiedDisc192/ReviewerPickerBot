@@ -1,4 +1,4 @@
-def info_message() -> str:
+def info_message():
     return (
         "ℹ️ Этот бот помогает автоматически назначать двух человек на ревью MR. \n\n"
         "Просто добавьте бота в ваш рабочий чат и напишите команду /start. "
@@ -9,7 +9,7 @@ def info_message() -> str:
     )
 
 
-def command_list() -> str:
+def command_list():
     return "\n".join(
         [
             "/start — Запустить бота",
@@ -22,6 +22,6 @@ def command_list() -> str:
     )
 
 
-def pool_message(users: list[str]) -> str:
+def pool_message(users):
     formatted_users = ", ".join(f"<code>{user}</code>" for user in users)
     return f"<b>📋 Текущий пулл</b>\n\n{formatted_users}"

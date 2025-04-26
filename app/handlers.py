@@ -3,7 +3,6 @@ import random
 from aiogram import F, Router
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import CommandStart, Command
-from collections import deque
 import app.keyboards as kb
 from app.client_data import get_chat_members
 import app.db.requests as rq
